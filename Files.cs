@@ -15,7 +15,7 @@ namespace Lab_04
         private int filescount= 0;
         private long Totalsize = 0;
         private IList<AllFiles> _allFiles;
-        //private IList<AllFiles> _byextension;
+        
         public StringBuilder stringBuilder = new StringBuilder();
         public Files()
         {
@@ -25,7 +25,7 @@ namespace Lab_04
 
 
         public void Search(string path)
-        {
+        {                                                                                   //utworzenie objektów  przez skanowanie scieżki
             var files = new DirectoryInfo(path);
             try
             {
@@ -42,24 +42,56 @@ namespace Lab_04
                     _directories++;
                 }
             }
-            catch (Exception)
+            catch (Exception)            //wywala przy plikach których nie widać w w explorerze
             {
+                
                 Console.WriteLine("Acces denied");
                 
             }
             
 
         }
+        private void GetAllData()
+        {
+            var types = _files.GroupBy(x =>
+            {
+                if (Extensions.fileExtensions.TryGetValue(Path.GetExtension(x.FileName), out string value))                 //jeśli klucz-extension jest w dict fileextension zwraca wartość, inaczej zwraca other
+                {
+                    return value;
+                }
+                return "other";
+
+            })
+            ;
+            
+            foreach (var fileType in types)
+            {
+                var totalSize = fileType.Sum(file => file.FileSize);
+                var avgSize = fileType.Average(file => file.FileSize);
+                var minSize = fileType.Min(file => file.FileSize);
+                var maxSize = fileType.Max(file => file.FileSize);
+
+                _allFiles.Add(new AllFiles(fileType.Key, fileType.Count().ToString(), totalSize.ToString(),
+                Math.Ceiling(avgSize).ToString(), minSize.ToString(), maxSize.ToString()));
+
+
+
+            }
+        }
         public void PrintRes()
         {
             Console.WriteLine("Directories: " +_directories);
             Console.WriteLine("Files: "+filescount +" "+ Totalsize+"MB");
             GetAllData();
-            
-            
+            Bytypes();    
+            ByExtension();
+            CountsByFirstLetter();
+            ByName();
+            BySize();
+        }
 
-
-            
+        private void Bytypes()
+        {
             stringBuilder.AppendLine("By types:");
             stringBuilder.AppendLine("\t\t[count] [total size] [avg size] [min size] [max size]");
             foreach (var type in _allFiles)
@@ -69,11 +101,6 @@ namespace Lab_04
             }
             Console.WriteLine(stringBuilder);
             stringBuilder.Clear();
-
-            ByExtension();
-            CountsByFirstLetter();
-            ByName();
-            BySize();
         }
 
         private void CountsByFirstLetter()//https://stackoverflow.com/questions/7132738/incrementing-a-numerical-value-in-a-dictionary
@@ -161,32 +188,6 @@ namespace Lab_04
             stringBuilder.Clear();
         }
 
-        private void GetAllData()
-        {
-            var types = _files.GroupBy(x =>
-            {
-                if (Extensions.fileExtensions.TryGetValue(Path.GetExtension(x.FileName), out string value))
-                {
-                    return value;
-                }
-                return "other";
-
-            })
-            ;
-            /////xdfdg fsdsfsd dsf reeee
-            foreach (var fileType in types)
-            {
-                var totalSize = fileType.Sum(file => file.FileSize);
-                var avgSize = fileType.Average(file => file.FileSize);
-                var minSize = fileType.Min(file => file.FileSize);
-                var maxSize = fileType.Max(file => file.FileSize);
-
-                _allFiles.Add(new AllFiles(fileType.Key, fileType.Count().ToString(), totalSize.ToString(),
-                Math.Ceiling(avgSize).ToString(), minSize.ToString(), maxSize.ToString()));
-
-
-                
-            }
-        }
+       
     }
 }

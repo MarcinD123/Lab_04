@@ -16,7 +16,7 @@ namespace Lab_04
         public string MaxSize { get; }
         public AllFiles(string name, string count, string totalSize, string avgSize, string minSize, string maxSize)
         {
-            Name = name;           //powinno byc extension xD
+            Name = name;           
             Count = count;
             TotalSize = totalSize;
             AvgSize = avgSize;
